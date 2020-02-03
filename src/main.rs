@@ -304,11 +304,10 @@ fn main() {
 
                     ctx.input_button(button, mx, my, state == ElementState::Pressed)
                 }
-                WindowEvent::MouseWheel { delta, .. } => {
-                    if let MouseScrollDelta::LineDelta(x, y) = delta {
-                        ctx.input_scroll(Vec2 { x: x * 22.0, y: y * 22.0 });
-                    }
-                }
+                WindowEvent::MouseWheel { delta, .. } => match delta {
+                    MouseScrollDelta::LineDelta(x, y) => ctx.input_scroll(Vec2 { x: x * 22.0, y: y * 22.0 }),
+                    MouseScrollDelta::PixelDelta(size) => ctx.input_scroll(Vec2 { x: size.x as f32, y: size.y as f32 }),
+                },
                 WindowEvent::Resized(_) => {
                     size = window.inner_size();
 

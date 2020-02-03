@@ -2,7 +2,7 @@ use nuklear::*;
 use nuklear_backend_wgpurs::Drawer;
 
 use winit::{
-    dpi::{LogicalSize, PhysicalPosition, PhysicalSize},
+    dpi::{LogicalSize, PhysicalPosition},
     event::{ElementState, Event, KeyboardInput, MouseButton as WinitMouseButton, MouseScrollDelta, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
@@ -325,11 +325,12 @@ fn main() {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-                let PhysicalSize { width: fw, height: fh } = window.inner_size();
-                let scale = Vec2 { x: 1., y: 1. };
+                let dpi = window.scale_factor();
+                let LogicalSize { width: fw, height: fh } = LogicalSize::<u32>::from_physical(window.inner_size(), dpi);
+                let scale = Vec2 { x: dpi as f32, y: dpi as f32 };
                 let mut encoder: wgpu::CommandEncoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { todo: 0 });
                 let frame = swapchain.get_next_texture();
-                drawer.draw(&mut ctx, &mut config, &mut encoder, &frame.view, &mut device, fw as u32, fh as u32, scale);
+                drawer.draw(&mut ctx, &mut config, &mut encoder, &frame.view, &mut device, fw, fh, scale);
                 queue.submit(&[encoder.finish()]);
             }
             Event::RedrawEventsCleared => {

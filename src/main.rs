@@ -362,7 +362,7 @@ fn ui_widget_centered(ctx: &mut Context, media: &mut Media, height: f32) {
 }
 
 fn free_type(_: &TextEdit, c: char) -> bool {
-    (c > '\u{0030}')
+    c > '\u{0030}'
 }
 
 fn grid_demo(ctx: &mut Context, media: &mut Media, state: &mut GridState) {

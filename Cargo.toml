@@ -10,7 +10,3 @@ nuklear-backend-wgpurs = {version = "~0.3"}
 winit = "~0.20"
 wgpu = "~0.4"
 image = "~0.21"
-
-[[bin]]
-name = "t"
-path = "src/main.rs"

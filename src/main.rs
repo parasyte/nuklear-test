@@ -2,10 +2,10 @@ use nuklear::*;
 use nuklear_backend_wgpurs::Drawer;
 
 use winit::{
-    dpi::{PhysicalPosition, LogicalSize, PhysicalSize},
-    window::WindowBuilder,
-    event_loop::{EventLoop,ControlFlow},
+    dpi::{LogicalSize, PhysicalPosition, PhysicalSize},
     event::{ElementState, Event, KeyboardInput, MouseButton as WinitMouseButton, MouseScrollDelta, VirtualKeyCode, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    window::WindowBuilder,
 };
 
 use std::fs::*;
@@ -91,17 +91,14 @@ fn icon_load(device: &mut wgpu::Device, queue: &mut wgpu::Queue, drawer: &mut Dr
 }
 
 fn main() {
-    let adapter = wgpu::Adapter::request(
-        &wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::Default,
-            backends: wgpu::BackendBit::PRIMARY,
-        },
-    ).unwrap();
+    let adapter = wgpu::Adapter::request(&wgpu::RequestAdapterOptions {
+        power_preference: wgpu::PowerPreference::Default,
+        backends: wgpu::BackendBit::PRIMARY,
+    })
+    .unwrap();
 
     let (mut device, mut queue) = adapter.request_device(&wgpu::DeviceDescriptor {
-        extensions: wgpu::Extensions {
-            anisotropic_filtering: false,
-        },
+        extensions: wgpu::Extensions { anisotropic_filtering: false },
         limits: wgpu::Limits::default(),
     });
 
@@ -258,86 +255,80 @@ fn main() {
 
     event_loop.run(move |event, _, flow| {
         *flow = ControlFlow::Wait;
-        match event { 
+        match event {
             Event::MainEventsCleared => {
                 ctx.input_end();
-                
                 basic_demo(&mut ctx, &mut media, &mut basic_state);
                 button_demo(&mut ctx, &mut media, &mut button_state);
                 grid_demo(&mut ctx, &mut media, &mut grid_state);
-        
                 window.request_redraw();
-            }, 
+            }
             Event::NewEvents(_) => {
                 ctx.input_begin();
-            }  
-            Event::WindowEvent { event, .. } => {
-                match event {
-                    WindowEvent::CloseRequested => *flow = ControlFlow::Exit,
-                    WindowEvent::ReceivedCharacter(c) => {
-                        ctx.input_unicode(c);
-                    }
-                    WindowEvent::KeyboardInput {
-                        input: KeyboardInput { state, virtual_keycode, .. },
-                        ..
-                    } => {
-                        if let Some(k) = virtual_keycode {
-                            let key = match k {
-                                VirtualKeyCode::Back => Key::Backspace,
-                                VirtualKeyCode::Delete => Key::Del,
-                                VirtualKeyCode::Up => Key::Up,
-                                VirtualKeyCode::Down => Key::Down,
-                                VirtualKeyCode::Left => Key::Left,
-                                VirtualKeyCode::Right => Key::Right,
-                                _ => Key::None,
-                            };
-
-                            ctx.input_key(key, state == ElementState::Pressed);
-                        }
-                    }
-                    WindowEvent::CursorMoved { position: PhysicalPosition { x, y }, .. } => {
-                        mx = x as i32;
-                        my = y as i32;
-                        ctx.input_motion(x as i32, y as i32);
-                    }
-                    WindowEvent::MouseInput { state, button, .. } => {
-                        let button = match button {
-                            WinitMouseButton::Left => Button::Left,
-                            WinitMouseButton::Middle => Button::Middle,
-                            WinitMouseButton::Right => Button::Right,
-                            _ => Button::Max,
-                        };
-
-                        ctx.input_button(button, mx, my, state == ElementState::Pressed)
-                    }
-                    WindowEvent::MouseWheel { delta, .. } => {
-                        if let MouseScrollDelta::LineDelta(x, y) = delta {
-                            ctx.input_scroll(Vec2 { x: x * 22.0, y: y * 22.0 });
-                        }
-                    }
-                    WindowEvent::Resized(_) => {
-                        size = window.inner_size();
-
-                        descriptor = wgpu::SwapChainDescriptor {
-                            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
-                            format: nuklear_backend_wgpurs::TEXTURE_FORMAT,
-                            width: size.width as u32,
-                            height: size.height as u32,
-                            present_mode: wgpu::PresentMode::Vsync,
-                        };
-
-                        swapchain = device.create_swap_chain(&surface, &descriptor);
-                    }
-                    _ => (),
-                }
             }
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => *flow = ControlFlow::Exit,
+                WindowEvent::ReceivedCharacter(c) => {
+                    ctx.input_unicode(c);
+                }
+                WindowEvent::KeyboardInput {
+                    input: KeyboardInput { state, virtual_keycode, .. },
+                    ..
+                } => {
+                    if let Some(k) = virtual_keycode {
+                        let key = match k {
+                            VirtualKeyCode::Back => Key::Backspace,
+                            VirtualKeyCode::Delete => Key::Del,
+                            VirtualKeyCode::Up => Key::Up,
+                            VirtualKeyCode::Down => Key::Down,
+                            VirtualKeyCode::Left => Key::Left,
+                            VirtualKeyCode::Right => Key::Right,
+                            _ => Key::None,
+                        };
+
+                        ctx.input_key(key, state == ElementState::Pressed);
+                    }
+                }
+                WindowEvent::CursorMoved { position: PhysicalPosition { x, y }, .. } => {
+                    mx = x as i32;
+                    my = y as i32;
+                    ctx.input_motion(x as i32, y as i32);
+                }
+                WindowEvent::MouseInput { state, button, .. } => {
+                    let button = match button {
+                        WinitMouseButton::Left => Button::Left,
+                        WinitMouseButton::Middle => Button::Middle,
+                        WinitMouseButton::Right => Button::Right,
+                        _ => Button::Max,
+                    };
+
+                    ctx.input_button(button, mx, my, state == ElementState::Pressed)
+                }
+                WindowEvent::MouseWheel { delta, .. } => {
+                    if let MouseScrollDelta::LineDelta(x, y) = delta {
+                        ctx.input_scroll(Vec2 { x: x * 22.0, y: y * 22.0 });
+                    }
+                }
+                WindowEvent::Resized(_) => {
+                    size = window.inner_size();
+
+                    descriptor = wgpu::SwapChainDescriptor {
+                        usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+                        format: nuklear_backend_wgpurs::TEXTURE_FORMAT,
+                        width: size.width as u32,
+                        height: size.height as u32,
+                        present_mode: wgpu::PresentMode::Vsync,
+                    };
+
+                    swapchain = device.create_swap_chain(&surface, &descriptor);
+                }
+                _ => (),
+            },
             Event::RedrawRequested(_) => {
                 let PhysicalSize { width: fw, height: fh } = window.inner_size();
                 let scale = Vec2 { x: 1., y: 1. };
-        
                 let mut encoder: wgpu::CommandEncoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { todo: 0 });
                 let frame = swapchain.get_next_texture();
-        
                 drawer.draw(&mut ctx, &mut config, &mut encoder, &frame.view, &mut device, fw as u32, fh as u32, scale);
                 queue.submit(&[encoder.finish()]);
             }

@@ -92,7 +92,7 @@ fn icon_load(device: &mut wgpu::Device, queue: &mut wgpu::Queue, drawer: &mut Dr
 
 fn main() {
     let adapter = wgpu::Adapter::request(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::Default,
+        power_preference: wgpu::PowerPreference::HighPerformance,
         backends: wgpu::BackendBit::PRIMARY,
     })
     .unwrap();
@@ -115,7 +115,7 @@ fn main() {
         format: nuklear_backend_wgpurs::TEXTURE_FORMAT,
         width: size.width as u32,
         height: size.height as u32,
-        present_mode: wgpu::PresentMode::Vsync,
+        present_mode: wgpu::PresentMode::NoVsync,
     };
 
     let mut swapchain = device.create_swap_chain(&surface, &descriptor);
@@ -292,7 +292,7 @@ fn main() {
                 WindowEvent::CursorMoved { position: PhysicalPosition { x, y }, .. } => {
                     mx = x as i32;
                     my = y as i32;
-                    ctx.input_motion(x as i32, y as i32);
+                    ctx.input_motion(mx, my);
                 }
                 WindowEvent::MouseInput { state, button, .. } => {
                     let button = match button {
